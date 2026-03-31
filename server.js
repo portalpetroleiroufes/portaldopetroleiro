@@ -25,6 +25,7 @@ const transporter = nodemailer.createTransport({
 // ==========================================
 const genAI = new GoogleGenerativeAI("AIzaSyAojHjUFlb03jNyjEzop1xMFAE0_9nXgKY");
 
+// Garantir que as pastas de upload existam na raiz (sem o 'public')
 const dirArticles = path.join(__dirname, 'uploads', 'articles');
 const dirLoja = path.join(__dirname, 'uploads');
 
@@ -35,9 +36,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(fileUpload());
 
+// LIBERA O ACESSO À RAIZ (Onde estão seus HTMLs) E UPLOADS
 app.use(express.static(__dirname)); 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// --- ROTA DA IA (PETROLINHO) ---
 app.post('/api/petrolinho', async (req, res) => {
     const { pergunta } = req.body;
     try {
@@ -51,6 +54,9 @@ app.post('/api/petrolinho', async (req, res) => {
     }
 });
 
+// ==========================================
+// 📰 SISTEMA DE NOTÍCIAS E ARTIGOS (SQLITE)
+// ==========================================
 app.get('/api/produtos', (req, res) => { 
     db.all('SELECT * FROM products ORDER BY id DESC', [], (err, rows) => res.json(rows || [])); 
 });
@@ -106,6 +112,9 @@ app.delete('/api/produto/:id', (req, res) => {
     db.run("DELETE FROM products WHERE id = ?", [req.params.id], () => res.send("OK")); 
 });
 
+// ==========================================
+// 🛒 SISTEMA DE VENDAS (RIFAS / LOJA - JSON)
+// ==========================================
 const arquivoLoja = path.join(__dirname, 'loja_produtos.json');
 const arquivoVendas = path.join(__dirname, 'loja_vendas_registradas.json');
 
@@ -183,11 +192,15 @@ app.delete('/api/loja/:id', (req, res) => {
     res.send("OK");
 });
 
+// ==========================================
+// 💸 CHECKOUT AUTOMÁTICO COM SEQUÊNCIA DE NÚMEROS
+// ==========================================
 app.post('/api/checkout-automatico', async (req, res) => {
     const { idProduto, nome, email, qtd, telefone } = req.body;
     const produtos = JSON.parse(fs.readFileSync(arquivoLoja));
     let vendas = JSON.parse(fs.readFileSync(arquivoVendas));
     const produto = produtos.find(p => p.id === parseInt(idProduto));
+    
     if(!produto) return res.status(404).json({ erro: "Anúncio não encontrado!" });
 
     // --- CÁLCULO DE PROMOÇÃO REAL ---
@@ -201,17 +214,20 @@ app.post('/api/checkout-automatico', async (req, res) => {
         valorFinal = q * parseFloat(produto.preco);
     }
 
-    // --- LÓGICA DE NÚMEROS EM SEQUÊNCIA ---
+    // --- LÓGICA DE NÚMEROS EM SEQUÊNCIA (O CORAÇÃO DO SISTEMA) ---
     const vendasDesteProduto = vendas.filter(v => v.idProduto === produto.id);
     let ultimoNum = 0;
     vendasDesteProduto.forEach(v => {
-        if(v.numeros) {
+        if(v.numeros && v.numeros.length > 0) {
             let max = Math.max(...v.numeros);
             if(max > ultimoNum) ultimoNum = max;
         }
     });
+
     let meusNumeros = [];
-    for(let i=1; i<=q; i++) { meusNumeros.push(ultimoNum + i); }
+    for(let i = 1; i <= q; i++) {
+        meusNumeros.push(ultimoNum + i);
+    }
 
     const idReserva = "RES-" + Date.now().toString().slice(-6);
     const novaVenda = {
@@ -223,23 +239,37 @@ app.post('/api/checkout-automatico', async (req, res) => {
         status: "Pendente",
         data: new Date().toLocaleString('pt-BR')
     };
+    
     vendas.push(novaVenda);
     fs.writeFileSync(arquivoVendas, JSON.stringify(vendas, null, 2));
+
+    const arquivoCSV = 'vendas_portal.csv';
+    if (!fs.existsSync(arquivoCSV)) {
+        fs.writeFileSync(arquivoCSV, 'Data;ID Reserva;Nome;WhatsApp;Email;Qtd;Valor Total\n');
+    }
+    const linhaCSV = `${novaVenda.data};${idReserva};${nome};${telefone};${email};${q};${valorFinal.toFixed(2)}\n`;
+    fs.appendFileSync(arquivoCSV, linhaCSV);
 
     try {
         await transporter.sendMail({
             from: '"Portal do Petroleiro UFES" <portalpetroleiroufes@gmail.com>',
             to: email,
-            subject: `🎫 Reserva: ${idReserva} - ${produto.titulo}`,
-            html: `<h2>Olá, ${nome}!</h2>
-                   <p>Sua reserva para <b>${produto.titulo}</b> foi recebida.</p>
-                   <p><b>Seus Números:</b> ${meusNumeros.join(', ')}</p>
-                   <p><b>Valor Total:</b> R$ ${valorFinal.toFixed(2)}</p>
-                   <p><b>Chave PIX:</b> ${produto.pix}</p>`
+            subject: `🎫 Reserva Confirmada: ${produto.titulo}`,
+            html: `
+                <div style="font-family: Arial; border-top: 10px solid #002d5b; padding: 20px;">
+                    <h2>Olá, ${nome}!</h2>
+                    <p>Sua reserva para <strong>${produto.titulo}</strong> foi recebida.</p>
+                    <p><strong>Seus Números:</strong> ${meusNumeros.join(', ')}</p>
+                    <p><strong>Valor Total:</strong> R$ ${valorFinal.toFixed(2)}</p>
+                    <p><strong>Chave PIX:</strong> ${produto.pix}</p>
+                </div>`
         });
-    } catch (error) { console.error("Erro e-mail:", error.message); }
+    } catch (error) { console.error("❌ Erro e-mail:", error.message); }
 
     res.json({ sucesso: true, recibo: idReserva, valor: valorFinal.toFixed(2), numeros: meusNumeros });
 });
 
-app.listen(PORT, () => { console.log(`🚀 MOTOR LIGADO NA PORTA ${PORT}!`); });
+// LIGA O MOTOR
+app.listen(PORT, () => { 
+    console.log(`\n🚀 MOTOR LIGADO NA PORTA ${PORT}! ACESSO LIVRE.`); 
+});
