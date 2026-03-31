@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mercado Global | Portal do Petroleiro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --azul: #002d5b; --laranja: #ff6600; --vidro: rgba(30, 33, 36, 0.95); }
+        body { 
+            margin: 0; padding-bottom: 80px; font-family: 'Segoe UI', sans-serif; color: white;
+            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1516937941344-00b4e0337589?q=80&w=1000');
+            background-size: cover; background-position: center; background-attachment: fixed;
+        }
+        header { background: rgba(0, 45, 91, 0.9); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--laranja); position: sticky; top:0; z-index:100; backdrop-filter: blur(10px); }
+        .container { max-width: 1000px; margin: 20px auto; padding: 0 20px; }
+        
+        .widget-box { background: var(--vidro); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { color: var(--laranja); margin-top: 0; display: flex; align-items: center; gap: 10px; font-size: 1.2rem; }
+        
+        /* Menu Inferior */
+        nav { position: fixed; bottom: 0; width: 100%; background: rgba(0, 45, 91, 0.95); display: flex; padding: 15px 0; border-top: 2px solid var(--laranja); z-index: 999; }
+        .nav-item { color: #a0c4ff; text-align: center; flex: 1; cursor: pointer; transition: 0.3s; }
+        .nav-item.active { color: var(--laranja); font-weight: bold; transform: scale(1.1); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <img src="logo-portal.png" style="height:35px; border-radius:50%; border:2px solid var(--laranja);" onerror="this.src='https://via.placeholder.com/35'">
+            <span style="font-weight:900; text-transform:uppercase;">Portal do Petroleiro</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 style="text-align: center; margin-bottom: 30px;">📊 Mercado Global em Tempo Real</h1>
+        
+        <div class="widget-box">
+            <h2><i class="fas fa-coins"></i> Cotações Rápidas</h2>
+            <div class="tradingview-widget-container" id="ticker-container"></div>
+        </div>
+
+        <div class="widget-box" style="height: 500px;">
+            <h2><i class="fas fa-chart-area"></i> Gráfico do Barril (WTI Crude Oil - USD)</h2>
+            <div class="tradingview-widget-container" style="height:calc(100% - 40px);width:100%">
+              <div id="tradingview_petroleo" style="height:100%;width:100%"></div>
+            </div>
+        </div>
+    </div>
+
+    <nav>
+        <div class="nav-item" onclick="window.location.href='index.html'">
+            <i class="fas fa-newspaper fa-lg"></i><br><small>Notícias</small>
+        </div>
+        <div class="nav-item active" onclick="window.location.href='mercado.html'">
+            <i class="fas fa-chart-line fa-lg"></i><br><small>Mercado</small>
+        </div>
+    </nav>
+
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script>
+        // Injetando o Widget do Dólar de forma limpa para não dar erro no VS Code
+        const scriptTicker = document.createElement('script');
+        scriptTicker.src = 'https://s3.tradingview.com/external-embedding/embed-widget-tickers.js';
+        scriptTicker.async = true;
+        scriptTicker.innerHTML = JSON.stringify({
+            "symbols": [
+                { "description": "Dólar / Real", "proName": "FX_IDC:USDBRL" },
+                { "description": "Petrobras (PETR4)", "proName": "BMFBOVESPA:PETR4" },
+                { "description": "Petróleo Brent", "proName": "TVC:UKOIL" }
+            ],
+            "colorTheme": "dark",
+            "isTransparent": true,
+            "showSymbolLogo": true,
+            "locale": "br"
+        });
+        document.getElementById('ticker-container').appendChild(scriptTicker);
+
+        // Iniciando o Gráfico Gigante
+        new TradingView.widget({
+            "autosize": true,
+            "symbol": "TVC:USOIL",
+            "interval": "D",
+            "timezone": "America/Sao_Paulo",
+            "theme": "dark",
+            "style": "1",
+            "locale": "br",
+            "enable_publishing": false,
+            "backgroundColor": "rgba(30, 33, 36, 1)",
+            "gridColor": "rgba(255, 255, 255, 0.05)",
+            "hide_top_toolbar": false,
+            "hide_legend": false,
+            "save_image": false,
+            "container_id": "tradingview_petroleo"
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil - Meus Anexos</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Estilo para a imagem de perfil */
+        .profile-picture-display {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%; /* Deixa a imagem redonda */
+            object-fit: cover; /* Garante que a imagem preencha o círculo sem distorcer */
+            display: block;
+            margin: 0 auto 20px auto; /* Centraliza a imagem */
+            border: 4px solid #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        
+        <img src="/images/default-avatar.png" alt="Foto de Perfil Atual" id="profile-picture-preview" class="profile-picture-display">
+
+        <form action="/perfil" method="post" enctype="multipart/form-data">
+            <h2>Meu Perfil</h2>
+            
+            <div class="input-group">
+                <label for="profilePicture">Alterar Foto de Perfil:</label>
+                <input type="file" id="profilePicture" name="profilePicture" accept="image/*">
+            </div>
+
+            <div class="input-group">
+                <label for="fullName">Nome Completo:</label>
+                <input type="text" id="fullName" name="fullName" placeholder="Seu nome aqui...">
+            </div>
+
+            <div class="input-group">
+                <label for="phone">Telefone:</label>
+                <input type="tel" id="phone" name="phone" placeholder="(XX) XXXXX-XXXX">
+            </div>
+
+            <div class="input-group">
+                <label for="address">Endereço:</label>
+                <input type="text" id="address" name="address" placeholder="Sua cidade, estado...">
+            </div>
+
+            <div class="input-group">
+                <label for="bio">Sua Bio:</label>
+                <textarea id="bio" name="bio" rows="4" placeholder="Fale um pouco sobre você..."></textarea>
+            </div>
+            
+            <button type="submit">Salvar Alterações</button>
+        </form>
+        <div class="extra-links">
+            <a href="/upload.html">Voltar para a página de uploads</a>
+        </div>
+    </div>
+
+    <script>
+        // Roda o script assim que a página carrega
+        window.addEventListener('DOMContentLoaded', () => {
+            // Pede os dados do perfil para a nossa API
+            fetch('/api/meu-perfil')
+                .then(response => {
+                    if (!response.ok) {
+                        window.location.href = '/'; // Redireciona se não estiver logado
+                        throw new Error('Usuário não autenticado');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Preenche os campos do formulário com os dados recebidos
+                    if (data.fullName) document.getElementById('fullName').value = data.fullName;
+                    if (data.phone) document.getElementById('phone').value = data.phone;
+                    if (data.address) document.getElementById('address').value = data.address;
+                    if (data.bio) document.getElementById('bio').value = data.bio;
+                    
+                    // Exibe a foto de perfil salva (ou a padrão)
+                    if (data.profilePicturePath) {
+                        document.getElementById('profile-picture-preview').src = data.profilePicturePath;
+                    }
+                })
+                .catch(error => console.error('Erro ao buscar e preencher dados do perfil:', error));
+        });
+    </script>
+</body>
+</html>

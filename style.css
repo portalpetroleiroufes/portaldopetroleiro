@@ -1,0 +1,141 @@
+/* 1. CONFIGURAÇÕES GERAIS E CORES (VARIÁVEIS) */
+:root {
+    --azul-ufes: #002d5b;      /* Azul escuro institucional */
+    --laranja-oil: #ff6600;    /* Laranja de segurança/indústria */
+    --preto-fundo: #0f1113;    /* Fundo quase preto para contraste */
+    --cinza-card: #1e2124;     /* Cinza para os cards de notícia */
+    --texto-branco: #ffffff;
+    --texto-suave: #cfd8dc;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: var(--preto-fundo);
+    color: var(--texto-branco);
+    line-height: 1.6;
+}
+
+/* 2. CABEÇALHO (HEADER) */
+header {
+    background: var(--azul-ufes);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid var(--laranja-oil);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo-text {
+    font-weight: 800;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* 3. CARDS DE NOTÍCIAS (GRID) */
+.grid-produtos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.item-card {
+    background: var(--cinza-card);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease, border 0.3s ease;
+    border: 1px solid #333;
+    text-decoration: none;
+    color: inherit;
+}
+
+.item-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--laranja-oil);
+}
+
+.item-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.item-info {
+    padding: 15px;
+}
+
+.item-info h4 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    color: var(--texto-branco);
+}
+
+.item-info p {
+    color: var(--laranja-oil);
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+/* 4. FORMULÁRIOS (ADMIN E LOGIN) */
+.admin-box, .login-container {
+    max-width: 600px;
+    margin: 50px auto;
+    background: #fff;
+    color: #333;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    background: var(--laranja-oil);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #e65c00;
+}
+
+/* 5. NAVEGAÇÃO MOBILE (BOTTOM NAV) */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: var(--azul-ufes);
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 0;
+    border-top: 2px solid var(--laranja-oil);
+}
+
+.nav-item {
+    color: #a0c4ff;
+    text-decoration: none;
+    font-size:

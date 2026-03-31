@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitrine - Minha Loja Profissional</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .vitrine { display: flex; flex-wrap: wrap; gap: 25px; padding: 20px; justify-content: center; background: #f4f4f4; }
+        .card { background: white; border-radius: 12px; width: 280px; padding: 15px; text-align: center; box-shadow: 0 6px 18px rgba(0,0,0,0.08); transition: 0.3s; position: relative; }
+        .card:hover { transform: translateY(-5px); }
+        .card img { width: 100%; height: 250px; object-fit: cover; border-radius: 8px; cursor: pointer; }
+        .preco { color: #28a745; font-size: 1.4em; font-weight: bold; margin: 10px 0; }
+        .estoque { font-size: 0.9em; color: #666; margin-bottom: 10px; }
+        .esgotado { position: absolute; top: 10px; left: 10px; background: red; color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; z-index: 10; }
+        .btn-ver { background: #333; color: white; border: none; padding: 12px; border-radius: 5px; width: 100%; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-ver:hover { background: #000; }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; margin: 30px 0; font-family: sans-serif;">🔥 Lançamentos</h1>
+    <div id="lista-produtos" class="vitrine"></div>
+
+    <script>
+        fetch('/api/produtos')
+            .then(res => res.json())
+            .then(produtos => {
+                const div = document.getElementById('lista-produtos');
+                div.innerHTML = ''; // Limpa a div antes de preencher
+
+                produtos.forEach(p => {
+                    // Pega apenas a primeira foto da lista ou uma imagem padrão caso não tenha
+                    const fotos = p.images ? p.images.split(',') : ['uploads/pictures/default.png'];
+                    const primeiraFoto = fotos[0];
+                    const semEstoque = p.stock_quantity <= 0;
+
+                    div.innerHTML += `
+                        <div class="card">
+                            ${semEstoque ? '<div class="esgotado">ESGOTADO</div>' : ''}
+                            <img src="${primeiraFoto}" alt="${p.name}" onclick="window.location.href='produto.html?id=${p.id}'">
+                            <h3>${p.name}</h3>
+                            <p style="color:#777; font-size:0.9em;">${p.category}</p>
+                            <div class="preco">R$ ${p.price.toFixed(2)}</div>
+                            <div class="estoque">Disponível: ${p.stock_quantity} un.</div>
+                            
+                            <button class="btn-ver" onclick="window.location.href='produto.html?id=${p.id}'">
+                                ${semEstoque ? 'Ver Detalhes' : 'Comprar Agora'}
+                            </button>
+                        </div>
+                    `;
+                });
+            });
+    </script>
+</body>
+</html>

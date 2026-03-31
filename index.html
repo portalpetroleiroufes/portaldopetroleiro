@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal do Petroleiro | UFES</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --azul: #002d5b; --laranja: #ff6600; --vidro: rgba(30, 33, 36, 0.85); }
+        body { 
+            margin: 0; padding-bottom: 80px; font-family: 'Segoe UI', sans-serif; color: white;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1516937941344-00b4e0337589?q=80&w=1000');
+            background-size: cover; background-position: center; background-attachment: fixed;
+        }
+        header { background: rgba(0, 45, 91, 0.9); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--laranja); position: sticky; top:0; z-index:100; backdrop-filter: blur(10px); }
+        
+        /* 🚀 NOVO: O CARROSSEL MÁGICO DA LOJA */
+        #secao-loja { display: none; padding: 20px 20px 0; max-width: 800px; margin: 0 auto; }
+        .titulo-secao { font-size: 16px; color: var(--laranja); text-transform: uppercase; font-weight: 900; margin-bottom: 10px; letter-spacing: 1px; }
+        .carrossel-container { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+        .carrossel-container::-webkit-scrollbar { display: none; }
+        .card-loja { flex: 0 0 280px; background: rgba(0, 21, 41, 0.95); border: 1px solid rgba(255,102,0,0.3); border-radius: 12px; overflow: hidden; scroll-snap-align: start; cursor: pointer; transition: transform 0.3s; position: relative; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .card-loja:active { transform: scale(0.95); }
+        .card-loja img { width: 100%; height: 150px; object-fit: cover; border-bottom: 2px solid var(--laranja); }
+        .card-loja-info { padding: 15px; }
+        .tag-tipo { position: absolute; top: 10px; left: 10px; background: var(--laranja); color: white; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; text-transform: uppercase; box-shadow: 0 2px 5px rgba(0,0,0,0.5); z-index: 10; }
+        
+        /* BUSCA E FILTROS (MANTIDOS INTACTOS) */
+        .search-container { padding: 20px; max-width: 800px; margin: 0 auto; }
+        .search-box { display: flex; background: var(--vidro); border-radius: 30px; padding: 5px 20px; border: 1px solid rgba(255,255,255,0.2); }
+        .search-box input { background: none; border: none; color: white; padding: 10px; width: 100%; outline: none; font-size: 16px; }
+        .filtros { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
+        .filter-btn { background: var(--vidro); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 8px 18px; border-radius: 20px; cursor: pointer; white-space: nowrap; }
+        .filter-btn.active { background: var(--laranja); font-weight: bold; }
+
+        /* GRID DE NOTÍCIAS (MANTIDO INTACTO) */
+        .grid-noticias { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 0 20px; max-width: 800px; margin: 0 auto; }
+        .item-card { background: var(--vidro); backdrop-filter: blur(5px); border-radius: 15px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.3s; }
+        .item-card:hover { transform: translateY(-5px); border-color: var(--laranja); }
+        .item-card img { width: 100%; height: 180px; object-fit: cover; }
+        .item-info { padding: 15px; }
+
+        /* ABA SOBRE (MANTIDO INTACTO) */
+        #modal-sobre { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(10px); }
+        .modal-content { background: var(--azul); padding: 30px; border-radius: 20px; width: 90%; max-width: 500px; border: 2px solid var(--laranja); position: relative; text-align: center; }
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 25px; cursor: pointer; }
+
+        /* PETROLINHO CHAT (MANTIDO INTACTO) */
+        #petrolinho-btn { position: fixed; bottom: 90px; right: 20px; width: 65px; height: 65px; background: var(--laranja); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4); z-index: 1000; overflow: hidden; }
+        #chat-window { position: fixed; bottom: 165px; right: 20px; width: 320px; height: 450px; background: #1e2124; border-radius: 15px; display: none; flex-direction: column; border: 2px solid var(--laranja); z-index: 1000; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .chat-header { background: var(--azul); padding: 15px; text-align: center; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; font-size: 14px; }
+        .msg.bot { background: #333; align-self: flex-start; }
+        .msg.user { background: var(--azul); align-self: flex-end; }
+        .chat-input { display: flex; padding: 12px; background: #141619; }
+        .chat-input input { flex: 1; background: #000; border: 1px solid #333; color: white; padding: 10px; border-radius: 5px; outline: none; }
+        
+        /* MENU INFERIOR */
+        nav { position: fixed; bottom: 0; width: 100%; background: rgba(0, 45, 91, 0.95); display: flex; padding: 15px 0; border-top: 2px solid var(--laranja); z-index: 999; }
+        .nav-item { text-align: center; flex: 1; cursor: pointer; color: #a0c4ff; }
+        .nav-item.active { color: var(--laranja); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <img src="logo-portal.png" style="height:35px; border-radius:50%; border:2px solid var(--laranja);" onerror="this.src='https://via.placeholder.com/35'">
+            <span style="font-weight:900; text-transform:uppercase;">Portal do Petroleiro</span>
+        </div>
+        <a href="https://instagram.com/portaldopetroleiro" target="_blank" style="color:white;"><i class="fab fa-instagram fa-lg"></i></a>
+    </header>
+
+    <div id="secao-loja">
+        <div class="titulo-secao"><i class="fas fa-shopping-bag"></i> Loja & Eventos em Destaque</div>
+        <div class="carrossel-container" id="carrossel-loja">
+            </div>
+    </div>
+
+    <div class="search-container">
+        <div class="search-box">
+            <i class="fas fa-search" style="margin-top:12px; margin-right: 10px;"></i>
+            <input type="text" id="searchInput" placeholder="Pesquisar notícias..." onkeyup="filtrar()">
+        </div>
+        <div class="filtros">
+            <button class="filter-btn active" onclick="fCat('Todos', this)">Todos</button>
+            <button class="filter-btn" onclick="fCat('Estágios e Empregos', this)">Estágios</button>
+            <button class="filter-btn" onclick="fCat('Institucional', this)">Institucional</button>
+            <button class="filter-btn" onclick="fCat('Eventos', this)">Eventos</button>
+        </div>
+    </div>
+
+    <div id="lista-noticias" class="grid-noticias"></div>
+
+    <div id="petrolinho-btn" onclick="toggleChat()">
+        <img src="petrolinho.png" style="width: 100%; height: 100%; object-fit: cover;" alt="Petrolinho" onerror="this.src='https://via.placeholder.com/65'">
+    </div>
+    
+    <div id="chat-window">
+        <div class="chat-header"><span>Petrolinho IA - CEUNES</span></div>
+        <div class="chat-messages" id="chatMsgs"><div class="msg bot">Olá! Sou o Petrolinho. Como posso ajudar você hoje?</div></div>
+        <div class="chat-input"><input type="text" id="userMsg" placeholder="Pergunte algo..." onkeypress="if(event.key==='Enter') enviarMensagem()"></div>
+    </div>
+
+    <div id="modal-sobre">
+        <div class="modal-content">
+            <span class="close-modal" onclick="toggleSobre()">&times;</span>
+            <h2 style="color:var(--laranja)">Sobre o Portal</h2>
+            <p>O Portal do Petroleiro é a voz da Engenharia de Petróleo no CEUNES/UFES.</p>
+            <hr style="border: 0.5px solid rgba(255,255,255,0.1); margin: 20px 0;">
+            <h3>🤝 Parcerias & Suporte</h3>
+            <p><i class="fab fa-instagram"></i> @portaldopetroleiro</p>
+            <p><i class="fas fa-envelope"></i> portaldopetroleiroufes@gmail.com</p>
+        </div>
+    </div>
+
+    <nav>
+        <div class="nav-item active" onclick="window.location.href='index.html'">
+            <i class="fas fa-newspaper fa-lg"></i><br><small>Notícias</small>
+        </div>
+        <div class="nav-item" onclick="window.location.href='mercado.html'">
+            <i class="fas fa-chart-line fa-lg"></i><br><small>Mercado</small>
+        </div>
+        <div class="nav-item" onclick="toggleSobre()">
+            <i class="fas fa-info-circle fa-lg"></i><br><small>Sobre</small>
+        </div>
+    </nav>
+
+    <script>
+        // 🚀 PUXA A LOJA NOVA (O CARROSSEL)
+        fetch('/api/loja').then(res => res.json()).then(produtos => {
+            if (produtos && produtos.length > 0) {
+                document.getElementById('secao-loja').style.display = 'block';
+                
+                document.getElementById('carrossel-loja').innerHTML = produtos.map(p => {
+                    let corTag = p.tipo === 'Ingresso' ? '#00cc66' : p.tipo === 'Minicurso' ? '#0099ff' : p.tipo === 'Camisa' ? '#9900cc' : '#ff6600';
+                    let precoL = String(p.preco).replace(/[R$\s]/gi, '').trim();
+                    let htmlPromo = (p.promoQtd && p.promoPreco) ? `<div style="font-size:11px; color:#ffcc00; margin-top:3px;"><i class="fas fa-star"></i> Promo: ${p.promoQtd} por R$ ${p.promoPreco}</div>` : '';
+                    
+                    return `
+                        <div class="card-loja" onclick="window.location.href='rifa.html?id=${p.id}'">
+                            <span class="tag-tipo" style="background:${corTag}">${p.tipo}</span>
+                            <img src="${p.imagem || 'https://via.placeholder.com/300'}" onerror="this.src='https://via.placeholder.com/300'">
+                            <div class="card-loja-info">
+                                <h3 style="margin: 0 0 5px 0; font-size: 16px; color: white;">${p.titulo}</h3>
+                                <div style="color: #00ff88; font-weight: 900; font-size: 18px;">R$ ${precoL}</div>
+                                ${htmlPromo}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        });
+
+        // NOTÍCIAS E FILTROS (MANTIDOS INTACTOS)
+        let noticias = [];
+        fetch('/api/produtos').then(res => res.json()).then(data => { noticias = data; render(data); });
+
+        function render(l) {
+            document.getElementById('lista-noticias').innerHTML = l.map(n => `
+                <div class="item-card" onclick="window.location.href='artigo.html?id=${n.id}'">
+                    <img src="${n.images ? n.images.split(',')[0] : 'https://via.placeholder.com/400'}" onerror="this.src='https://via.placeholder.com/400'">
+                    <div class="item-info">
+                        <span style="color:var(--laranja); font-size:11px; font-weight:bold; text-transform:uppercase;">${n.category}</span>
+                        <h4 style="margin:8px 0; font-size:18px;">${n.name}</h4>
+                        <p style="font-size:12px; color:#ccc;"><i class="far fa-calendar-alt"></i> ${n.price}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filtrar() {
+            const t = document.getElementById('searchInput').value.toLowerCase();
+            render(noticias.filter(n => n.name.toLowerCase().includes(t)));
+        }
+
+        function fCat(c, b) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            b.classList.add('active');
+            render(c === 'Todos' ? noticias : noticias.filter(n => n.category === c));
+        }
+
+        // FUNÇÕES DO MODAL E DO PETROLINHO (MANTIDAS INTACTAS)
+        function toggleSobre() {
+            const m = document.getElementById('modal-sobre');
+            m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function toggleChat() {
+            const c = document.getElementById('chat-window');
+            c.style.display = c.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        async function enviarMensagem() {
+            const input = document.getElementById('userMsg');
+            const msg = input.value;
+            if(!msg) return;
+            const chat = document.getElementById('chatMsgs');
+            chat.innerHTML += `<div class="msg user">${msg}</div>`;
+            input.value = '';
+            const loadId = "load-" + Date.now();
+            chat.innerHTML += `<div class="msg bot" id="${loadId}">Pesquisando...</div>`;
+            chat.scrollTop = chat.scrollHeight;
+
+            try {
+                const res = await fetch('/api/petrolinho', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pergunta: msg })
+                });
+                const data = await res.json();
+                document.getElementById(loadId).innerHTML = data.resposta;
+            } catch (e) {
+                document.getElementById(loadId).innerText = "Erro na conexão.";
+            }
+            chat.scrollTop = chat.scrollHeight;
+        }
+    </script>
+</body>
+</html>

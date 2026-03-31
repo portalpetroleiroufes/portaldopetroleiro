@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Guardar Meus Anexos</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav style="padding: 20px; text-align: right; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: flex-end; align-items: center;">
+    <span id="user-name" style="margin-right: 15px; font-weight: bold; color: #333;">Carregando...</span>
+
+    <a href="/perfil.html">
+        <img id="profile-pic" src="/images/default-avatar.png" alt="Foto de Perfil" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer;">
+    </a>
+
+    <a href="/logout" style="margin-left: 15px; text-decoration: none; color: #1877f2; font-weight: bold;">Sair</a>
+</nav>
+    <header>
+        <h1>Meu Site de Anexos</h1>
+        <nav><a href="/logout">Sair</a></nav>
+    </header>
+    <main class="container">
+        <h2>Guardar Meus Anexos</h2>
+        <form id="uploadForm">
+            <input type="file" name="meuArquivo" id="meuArquivo" required>
+            <button type="submit">Enviar Arquivo</button>
+        </form>
+        <div id="mensagem"></div>
+    </main>
+    <footer>
+        <p>&copy; 2025 Meu Projeto.</p>
+    </footer>
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('meuArquivo', document.getElementById('meuArquivo').files[0]);
+            const mensagemDiv = document.getElementById('mensagem');
+            mensagemDiv.textContent = 'Enviando...';
+            try {
+                const response = await fetch('/upload', { method: 'POST', body: formData });
+                mensagemDiv.innerHTML = await response.text();
+            } catch (error) {
+                mensagemDiv.textContent = 'Erro ao enviar o arquivo.';
+            }
+        });
+    </script>
+    <script>
+  // Esta função roda assim que a página HTML termina de carregar
+  window.addEventListener('DOMContentLoaded', () => {
+
+    // Usamos o "fetch" para pedir os dados do perfil para a nossa API no servidor
+    fetch('/api/meu-perfil')
+      .then(response => {
+        // Se a resposta não for 'ok' (ex: usuário não logado), não continuamos
+        if (!response.ok) {
+          // Se não estiver logado, podemos redirecionar para o login
+          window.location.href = '/';
+          throw new Error('Usuário não autenticado');
+        }
+        return response.json(); // Transforma a resposta em dados JSON
+      })
+      .then(data => {
+        // Se deu tudo certo, 'data' contém os dados do usuário
+
+        // Pegamos os elementos HTML pelos seus IDs
+        const userNameElement = document.getElementById('user-name');
+        const profilePicElement = document.getElementById('profile-pic');
+
+        // Atualizamos o nome (usa o nome completo se existir, senão o username)
+        userNameElement.textContent = data.fullName || data.username;
+
+        // Atualizamos a foto (usa a foto do perfil se existir, senão mantém a padrão)
+        if (data.profilePicturePath) {
+          profilePicElement.src = data.profilePicturePath;
+        }
+      })
+      .catch(error => {
+        console.error('Erro ao buscar dados do perfil:', error);
+      });
+  });
+</script>
+
+</body>
+</html>

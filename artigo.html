@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lendo Notícia | Portal do Petroleiro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --azul: #002d5b; --laranja: #ff6600; --vidro: rgba(30, 33, 36, 0.95); }
+        body { 
+            margin: 0; font-family: 'Segoe UI', sans-serif; color: white;
+            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1516937941344-00b4e0337589?q=80&w=1000');
+            background-size: cover; background-position: center; background-attachment: fixed;
+        }
+        header { background: rgba(0, 45, 91, 0.9); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--laranja); position: sticky; top:0; z-index:100; backdrop-filter: blur(10px); }
+        
+        .container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
+        .btn-voltar { display: inline-block; background: var(--laranja); color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-bottom: 20px; transition: 0.3s; }
+        .btn-voltar:hover { background: #e65c00; }
+        
+        .artigo-box { background: var(--vidro); padding: 30px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .artigo-categoria { color: var(--laranja); font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        .artigo-titulo { font-size: 28px; margin: 10px 0; color: white; }
+        .artigo-data { color: #aaa; font-size: 14px; margin-bottom: 20px; }
+        
+        .artigo-imagem { width: 100%; max-height: 400px; object-fit: cover; border-radius: 10px; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.2); }
+        
+        /* O pre-line garante que os parágrafos que você deu "Enter" no admin fiquem corretos aqui */
+        .artigo-texto { font-size: 16px; line-height: 1.8; color: #ddd;} 
+    </style>
+</head>
+<body>
+
+    <header>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <img src="logo-portal.png" style="height:35px; border-radius:50%; border:2px solid var(--laranja);" onerror="this.src='https://via.placeholder.com/35'">
+            <span style="font-weight:900; text-transform:uppercase;">Portal do Petroleiro</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="btn-voltar"><i class="fas fa-arrow-left"></i> Voltar para as Notícias</a>
+        
+        <div class="artigo-box" id="conteudo-artigo">
+            <h2 style="text-align: center; color: #aaa;">Carregando notícia...</h2>
+        </div>
+    </div>
+
+    <script>
+        // Pega o ID da notícia lá no link do navegador
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+
+        if (id) {
+            // Pede as informações daquela notícia específica pro servidor
+            fetch(`/api/produto/${id}`)
+                .then(res => res.json())
+                .then(noticia => {
+                    if (noticia && noticia.name) {
+                        // Monta a tela com os textos da notícia
+                        let html = `
+                            <div class="artigo-categoria">${noticia.category}</div>
+                            <h1 class="artigo-titulo">${noticia.name}</h1>
+                            <div class="artigo-data"><i class="far fa-calendar-alt"></i> ${noticia.price}</div>
+                        `;
+
+                        // Se tiver imagem, coloca a principal
+                        if (noticia.images) {
+                            const fotoPrincipal = noticia.images.split(',')[0];
+                            html += `<img src="${fotoPrincipal}" class="artigo-imagem" alt="Foto da Notícia">`;
+                        }
+
+                        // Coloca o texto
+                        html += `<div class="artigo-texto">${noticia.description}</div>`;
+
+                        document.getElementById('conteudo-artigo').innerHTML = html;
+                    } else {
+                        document.getElementById('conteudo-artigo').innerHTML = `<h2 style="text-align:center; color:red;">Notícia não encontrada!</h2>`;
+                    }
+                })
+                .catch(erro => {
+                    document.getElementById('conteudo-artigo').innerHTML = `<h2 style="text-align:center; color:red;">Erro ao carregar a notícia.</h2>`;
+                });
+        } else {
+            document.getElementById('conteudo-artigo').innerHTML = `<h2 style="text-align:center; color:var(--laranja);">Nenhuma notícia selecionada.</h2>`;
+        }
+    </script>
+</body>
+</html>

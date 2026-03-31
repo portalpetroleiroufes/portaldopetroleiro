@@ -1,0 +1,31 @@
+[
+  {
+    "id": 1774788322403,
+    "ativo": true,
+    "tipo": "Minicurso",
+    "titulo": "perfuração",
+    "descricao": "inicio as 19h",
+    "preco": "20",
+    "promoQtd": "",
+    "promoPreco": "",
+    "maxVendas": "100",
+    "pix": "27995158154",
+    "linkCartao": "",
+    "imagem": "uploads/produto-1774788322403.jpeg"
+  },
+  {
+    "id": 1774963385162,
+    "ativo": true,
+    "tipo": "Rifa",
+    "titulo": "Premio dia das mães",
+    "descricao": "prsenteie sua mae com um cesta de chcolate e flores",
+    "preco": "5",
+    "promoQtd": "3",
+    "promoPreco": "10",
+    "maxVendas": "",
+    "limitePorUsuario": 0,
+    "pix": "27995158154",
+    "linkCartao": "",
+    "imagem": "uploads/prod-edit-1774966230115.jpeg"
+  }
+]
