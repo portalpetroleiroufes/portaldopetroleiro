@@ -25,7 +25,6 @@
         .card-loja-info { padding: 15px; }
         .tag-tipo { position: absolute; top: 10px; left: 10px; background: var(--laranja); color: white; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; text-transform: uppercase; box-shadow: 0 2px 5px rgba(0,0,0,0.5); z-index: 10; }
         
-        /* BUSCA E FILTROS (MANTIDOS INTACTOS) */
         .search-container { padding: 20px; max-width: 800px; margin: 0 auto; }
         .search-box { display: flex; background: var(--vidro); border-radius: 30px; padding: 5px 20px; border: 1px solid rgba(255,255,255,0.2); }
         .search-box input { background: none; border: none; color: white; padding: 10px; width: 100%; outline: none; font-size: 16px; }
@@ -33,19 +32,16 @@
         .filter-btn { background: var(--vidro); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 8px 18px; border-radius: 20px; cursor: pointer; white-space: nowrap; }
         .filter-btn.active { background: var(--laranja); font-weight: bold; }
 
-        /* GRID DE NOTÍCIAS (MANTIDO INTACTO) */
         .grid-noticias { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 0 20px; max-width: 800px; margin: 0 auto; }
         .item-card { background: var(--vidro); backdrop-filter: blur(5px); border-radius: 15px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.3s; }
         .item-card:hover { transform: translateY(-5px); border-color: var(--laranja); }
         .item-card img { width: 100%; height: 180px; object-fit: cover; }
         .item-info { padding: 15px; }
 
-        /* ABA SOBRE (MANTIDO INTACTO) */
         #modal-sobre { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(10px); }
         .modal-content { background: var(--azul); padding: 30px; border-radius: 20px; width: 90%; max-width: 500px; border: 2px solid var(--laranja); position: relative; text-align: center; }
         .close-modal { position: absolute; top: 15px; right: 20px; font-size: 25px; cursor: pointer; }
 
-        /* PETROLINHO CHAT (MANTIDO INTACTO) */
         #petrolinho-btn { position: fixed; bottom: 90px; right: 20px; width: 65px; height: 65px; background: var(--laranja); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4); z-index: 1000; overflow: hidden; }
         #chat-window { position: fixed; bottom: 165px; right: 20px; width: 320px; height: 450px; background: #1e2124; border-radius: 15px; display: none; flex-direction: column; border: 2px solid var(--laranja); z-index: 1000; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .chat-header { background: var(--azul); padding: 15px; text-align: center; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; }
@@ -56,14 +52,12 @@
         .chat-input { display: flex; padding: 12px; background: #141619; }
         .chat-input input { flex: 1; background: #000; border: 1px solid #333; color: white; padding: 10px; border-radius: 5px; outline: none; }
         
-        /* MENU INFERIOR */
         nav { position: fixed; bottom: 0; width: 100%; background: rgba(0, 45, 91, 0.95); display: flex; padding: 15px 0; border-top: 2px solid var(--laranja); z-index: 999; }
         .nav-item { text-align: center; flex: 1; cursor: pointer; color: #a0c4ff; }
         .nav-item.active { color: var(--laranja); }
     </style>
 </head>
 <body>
-
     <header>
         <div style="display:flex; align-items:center; gap:10px;">
             <img src="logo-portal.png" style="height:35px; border-radius:50%; border:2px solid var(--laranja);" onerror="this.src='https://via.placeholder.com/35'">
@@ -74,8 +68,7 @@
 
     <div id="secao-loja">
         <div class="titulo-secao"><i class="fas fa-shopping-bag"></i> Loja & Eventos em Destaque</div>
-        <div class="carrossel-container" id="carrossel-loja">
-            </div>
+        <div class="carrossel-container" id="carrossel-loja"></div>
     </div>
 
     <div class="search-container">
@@ -119,8 +112,8 @@
         <div class="nav-item active" onclick="window.location.href='index.html'">
             <i class="fas fa-newspaper fa-lg"></i><br><small>Notícias</small>
         </div>
-        <div class="nav-item" onclick="window.location.href='mercado.html'">
-            <i class="fas fa-chart-line fa-lg"></i><br><small>Mercado</small>
+        <div class="nav-item" onclick="window.location.href='rifa.html'">
+            <i class="fas fa-chart-line fa-lg"></i><br><small>Vendas</small>
         </div>
         <div class="nav-item" onclick="toggleSobre()">
             <i class="fas fa-info-circle fa-lg"></i><br><small>Sobre</small>
@@ -128,24 +121,18 @@
     </nav>
 
     <script>
-        // 🚀 PUXA A LOJA NOVA (O CARROSSEL)
         fetch('/api/loja').then(res => res.json()).then(produtos => {
             if (produtos && produtos.length > 0) {
                 document.getElementById('secao-loja').style.display = 'block';
-                
                 document.getElementById('carrossel-loja').innerHTML = produtos.map(p => {
-                    let corTag = p.tipo === 'Ingresso' ? '#00cc66' : p.tipo === 'Minicurso' ? '#0099ff' : p.tipo === 'Camisa' ? '#9900cc' : '#ff6600';
-                    let precoL = String(p.preco).replace(/[R$\s]/gi, '').trim();
-                    let htmlPromo = (p.promoQtd && p.promoPreco) ? `<div style="font-size:11px; color:#ffcc00; margin-top:3px;"><i class="fas fa-star"></i> Promo: ${p.promoQtd} por R$ ${p.promoPreco}</div>` : '';
-                    
+                    let corTag = p.tipo === 'Ingresso' ? '#00cc66' : p.tipo === 'Minicurso' ? '#0099ff' : '#ff6600';
                     return `
                         <div class="card-loja" onclick="window.location.href='rifa.html?id=${p.id}'">
                             <span class="tag-tipo" style="background:${corTag}">${p.tipo}</span>
-                            <img src="${p.imagem || 'https://via.placeholder.com/300'}" onerror="this.src='https://via.placeholder.com/300'">
+                            <img src="${p.imagem ? '/' + p.imagem : 'https://via.placeholder.com/300'}" onerror="this.src='https://via.placeholder.com/300'">
                             <div class="card-loja-info">
                                 <h3 style="margin: 0 0 5px 0; font-size: 16px; color: white;">${p.titulo}</h3>
-                                <div style="color: #00ff88; font-weight: 900; font-size: 18px;">R$ ${precoL}</div>
-                                ${htmlPromo}
+                                <div style="color: #00ff88; font-weight: 900; font-size: 18px;">R$ ${p.preco}</div>
                             </div>
                         </div>
                     `;
@@ -153,18 +140,16 @@
             }
         });
 
-        // NOTÍCIAS E FILTROS (MANTIDOS INTACTOS)
         let noticias = [];
         fetch('/api/produtos').then(res => res.json()).then(data => { noticias = data; render(data); });
 
         function render(l) {
             document.getElementById('lista-noticias').innerHTML = l.map(n => `
                 <div class="item-card" onclick="window.location.href='artigo.html?id=${n.id}'">
-                    <img src="${n.images ? n.images.split(',')[0] : 'https://via.placeholder.com/400'}" onerror="this.src='https://via.placeholder.com/400'">
+                    <img src="${n.images ? '/' + n.images.split(',')[0] : 'https://via.placeholder.com/400'}" onerror="this.src='https://via.placeholder.com/400'">
                     <div class="item-info">
                         <span style="color:var(--laranja); font-size:11px; font-weight:bold; text-transform:uppercase;">${n.category}</span>
                         <h4 style="margin:8px 0; font-size:18px;">${n.name}</h4>
-                        <p style="font-size:12px; color:#ccc;"><i class="far fa-calendar-alt"></i> ${n.price}</p>
                     </div>
                 </div>
             `).join('');
@@ -181,7 +166,6 @@
             render(c === 'Todos' ? noticias : noticias.filter(n => n.category === c));
         }
 
-        // FUNÇÕES DO MODAL E DO PETROLINHO (MANTIDAS INTACTAS)
         function toggleSobre() {
             const m = document.getElementById('modal-sobre');
             m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
@@ -200,9 +184,8 @@
             chat.innerHTML += `<div class="msg user">${msg}</div>`;
             input.value = '';
             const loadId = "load-" + Date.now();
-            chat.innerHTML += `<div class="msg bot" id="${loadId}">Pesquisando...</div>`;
+            chat.innerHTML += `<div class="msg bot" id="${loadId}">...</div>`;
             chat.scrollTop = chat.scrollHeight;
-
             try {
                 const res = await fetch('/api/petrolinho', {
                     method: 'POST',
@@ -212,7 +195,7 @@
                 const data = await res.json();
                 document.getElementById(loadId).innerHTML = data.resposta;
             } catch (e) {
-                document.getElementById(loadId).innerText = "Erro na conexão.";
+                document.getElementById(loadId).innerText = "Erro.";
             }
             chat.scrollTop = chat.scrollHeight;
         }
