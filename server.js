@@ -25,7 +25,6 @@ const transporter = nodemailer.createTransport({
 // ==========================================
 const genAI = new GoogleGenerativeAI("AIzaSyAojHjUFlb03jNyjEzop1xMFAE0_9nXgKY");
 
-// Garantir que as pastas de upload existam na raiz (sem o 'public')
 const dirArticles = path.join(__dirname, 'uploads', 'articles');
 const dirLoja = path.join(__dirname, 'uploads');
 
@@ -36,11 +35,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(fileUpload());
 
-// LIBERA O ACESSO À RAIZ (Onde estão seus HTMLs) E UPLOADS
 app.use(express.static(__dirname)); 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// --- ROTA DA IA (PETROLINHO) ---
 app.post('/api/petrolinho', async (req, res) => {
     const { pergunta } = req.body;
     try {
@@ -54,9 +51,6 @@ app.post('/api/petrolinho', async (req, res) => {
     }
 });
 
-// ==========================================
-// 📰 SISTEMA DE NOTÍCIAS E ARTIGOS (SQLITE)
-// ==========================================
 app.get('/api/produtos', (req, res) => { 
     db.all('SELECT * FROM products ORDER BY id DESC', [], (err, rows) => res.json(rows || [])); 
 });
@@ -112,9 +106,6 @@ app.delete('/api/produto/:id', (req, res) => {
     db.run("DELETE FROM products WHERE id = ?", [req.params.id], () => res.send("OK")); 
 });
 
-// ==========================================
-// 🛒 SISTEMA DE VENDAS (RIFAS / LOJA - JSON)
-// ==========================================
 const arquivoLoja = path.join(__dirname, 'loja_produtos.json');
 const arquivoVendas = path.join(__dirname, 'loja_vendas_registradas.json');
 
@@ -174,7 +165,6 @@ app.post('/api/loja/editar/:id', (req, res) => {
         produtos[idx].pix = req.body.pix;
         produtos[idx].tipo = req.body.tipo;
         produtos[idx].ativo = req.body.ativo === 'on';
-
         if (req.files && req.files.imagemProduto) {
             const file = req.files.imagemProduto;
             const nomeImagem = 'prod-edit-' + Date.now() + path.extname(file.name);
@@ -193,63 +183,63 @@ app.delete('/api/loja/:id', (req, res) => {
     res.send("OK");
 });
 
-// ==========================================
-// 💸 CHECKOUT AUTOMÁTICO E REGISTRO CSV
-// ==========================================
 app.post('/api/checkout-automatico', async (req, res) => {
     const { idProduto, nome, email, qtd, telefone } = req.body;
     const produtos = JSON.parse(fs.readFileSync(arquivoLoja));
     let vendas = JSON.parse(fs.readFileSync(arquivoVendas));
     const produto = produtos.find(p => p.id === parseInt(idProduto));
-    
     if(!produto) return res.status(404).json({ erro: "Anúncio não encontrado!" });
 
-    let valorFinal = parseFloat(produto.preco) * qtd;
-    if(produto.promoQtd && qtd >= parseInt(produto.promoQtd)) {
-        valorFinal = qtd * (parseFloat(produto.promoPreco) / parseInt(produto.promoQtd));
+    // --- CÁLCULO DE PROMOÇÃO REAL ---
+    let q = parseInt(qtd);
+    let valorFinal = 0;
+    if(produto.promoQtd && q >= parseInt(produto.promoQtd)) {
+        let combos = Math.floor(q / parseInt(produto.promoQtd));
+        let sobra = q % parseInt(produto.promoQtd);
+        valorFinal = (combos * parseFloat(produto.promoPreco)) + (sobra * parseFloat(produto.preco));
+    } else {
+        valorFinal = q * parseFloat(produto.preco);
     }
 
-    const idReserva = "RES-" + Date.now().toString().slice(-6);
+    // --- LÓGICA DE NÚMEROS EM SEQUÊNCIA ---
+    const vendasDesteProduto = vendas.filter(v => v.idProduto === produto.id);
+    let ultimoNum = 0;
+    vendasDesteProduto.forEach(v => {
+        if(v.numeros) {
+            let max = Math.max(...v.numeros);
+            if(max > ultimoNum) ultimoNum = max;
+        }
+    });
+    let meusNumeros = [];
+    for(let i=1; i<=q; i++) { meusNumeros.push(ultimoNum + i); }
 
+    const idReserva = "RES-" + Date.now().toString().slice(-6);
     const novaVenda = {
         idVenda: idReserva,
         idProduto: produto.id,
-        nome, email, telefone, qtd,
+        nome, email, telefone, qtd: q,
         valorTotal: valorFinal.toFixed(2),
+        numeros: meusNumeros,
         status: "Pendente",
         data: new Date().toLocaleString('pt-BR')
     };
-    
     vendas.push(novaVenda);
     fs.writeFileSync(arquivoVendas, JSON.stringify(vendas, null, 2));
-
-    const arquivoCSV = 'vendas_portal.csv';
-    if (!fs.existsSync(arquivoCSV)) {
-        fs.writeFileSync(arquivoCSV, 'Data;ID Reserva;Nome;WhatsApp;Email;Qtd;Valor Total\n');
-    }
-    const linhaCSV = `${novaVenda.data};${idReserva};${nome};${telefone};${email};${qtd};${valorFinal.toFixed(2)}\n`;
-    fs.appendFileSync(arquivoCSV, linhaCSV);
 
     try {
         await transporter.sendMail({
             from: '"Portal do Petroleiro UFES" <portalpetroleiroufes@gmail.com>',
             to: email,
-            subject: `⏳ Reserva: ${idReserva} - ${produto.titulo}`,
-            html: `<div style="font-family: Arial; border-top: 10px solid #002d5b; padding: 20px;">
-                    <h2>Olá, ${nome}!</h2>
-                    <p>Reserva para <strong>${produto.titulo}</strong> recebida.</p>
-                    <p><strong>Valor Total:</strong> R$ ${valorFinal.toFixed(2)}</p>
-                    <p><strong>Chave PIX:</strong> ${produto.pix}</p>
-                   </div>`
+            subject: `🎫 Reserva: ${idReserva} - ${produto.titulo}`,
+            html: `<h2>Olá, ${nome}!</h2>
+                   <p>Sua reserva para <b>${produto.titulo}</b> foi recebida.</p>
+                   <p><b>Seus Números:</b> ${meusNumeros.join(', ')}</p>
+                   <p><b>Valor Total:</b> R$ ${valorFinal.toFixed(2)}</p>
+                   <p><b>Chave PIX:</b> ${produto.pix}</p>`
         });
-    } catch (error) {
-        console.error("❌ Erro e-mail:", error.message);
-    }
+    } catch (error) { console.error("Erro e-mail:", error.message); }
 
-    res.json({ sucesso: true, recibo: idReserva, valor: valorFinal.toFixed(2) });
+    res.json({ sucesso: true, recibo: idReserva, valor: valorFinal.toFixed(2), numeros: meusNumeros });
 });
 
-// LIGA O MOTOR
-app.listen(PORT, () => { 
-    console.log(`\n🚀 MOTOR COMPLETO LIGADO NA PORTA ${PORT}!`); 
-});
+app.listen(PORT, () => { console.log(`🚀 MOTOR LIGADO NA PORTA ${PORT}!`); });
