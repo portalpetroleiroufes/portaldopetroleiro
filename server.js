@@ -34,7 +34,7 @@ app.use(express.json());
 app.use(fileUpload());
 
 // LIBERA O ACESSO TOTAL À PASTA PUBLIC (Onde está o seu admin.html)
-app.use(express.static('public')); 
+app.use(express.static(__dirname)); 
 
 // --- ROTA DA IA (PETROLINHO) ---
 app.post('/api/petrolinho', async (req, res) => {
