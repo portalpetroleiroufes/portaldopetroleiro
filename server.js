@@ -25,16 +25,20 @@ const transporter = nodemailer.createTransport({
 // ==========================================
 const genAI = new GoogleGenerativeAI("AIzaSyAojHjUFlb03jNyjEzop1xMFAE0_9nXgKY");
 
-// Garantir que a pasta de uploads existe
-const dirArticles = path.join(__dirname, 'public', 'uploads', 'articles');
+// Garantir que as pastas de upload existam na raiz (sem o 'public')
+const dirArticles = path.join(__dirname, 'uploads', 'articles');
+const dirLoja = path.join(__dirname, 'uploads');
+
 if (!fs.existsSync(dirArticles)){ fs.mkdirSync(dirArticles, { recursive: true }); }
+if (!fs.existsSync(dirLoja)){ fs.mkdirSync(dirLoja, { recursive: true }); }
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(fileUpload());
 
-// LIBERA O ACESSO TOTAL À PASTA PUBLIC (Onde está o seu admin.html)
+// LIBERA O ACESSO À RAIZ (Onde estão seus HTMLs) E UPLOADS
 app.use(express.static(__dirname)); 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // --- ROTA DA IA (PETROLINHO) ---
 app.post('/api/petrolinho', async (req, res) => {
@@ -51,7 +55,7 @@ app.post('/api/petrolinho', async (req, res) => {
 });
 
 // ==========================================
-// 📰 SISTEMA DE NOTÍCIAS E ARTIGOS
+// 📰 SISTEMA DE NOTÍCIAS E ARTIGOS (SQLITE)
 // ==========================================
 app.get('/api/produtos', (req, res) => { 
     db.all('SELECT * FROM products ORDER BY id DESC', [], (err, rows) => res.json(rows || [])); 
@@ -109,7 +113,7 @@ app.delete('/api/produto/:id', (req, res) => {
 });
 
 // ==========================================
-// 🛒 SISTEMA DE VENDAS (RIFAS / LOJA)
+// 🛒 SISTEMA DE VENDAS (RIFAS / LOJA - JSON)
 // ==========================================
 const arquivoLoja = path.join(__dirname, 'loja_produtos.json');
 const arquivoVendas = path.join(__dirname, 'loja_vendas_registradas.json');
@@ -147,7 +151,7 @@ app.post('/api/loja/cadastrar', (req, res) => {
     if (req.files && req.files.imagemProduto) {
         const file = req.files.imagemProduto;
         const nomeImagem = 'prod-' + Date.now() + path.extname(file.name);
-        file.mv(path.join(__dirname, 'public/uploads', nomeImagem));
+        file.mv(path.join(__dirname, 'uploads', nomeImagem));
         novoProduto.imagem = 'uploads/' + nomeImagem;
     }
     produtos.push(novoProduto);
@@ -174,7 +178,7 @@ app.post('/api/loja/editar/:id', (req, res) => {
         if (req.files && req.files.imagemProduto) {
             const file = req.files.imagemProduto;
             const nomeImagem = 'prod-edit-' + Date.now() + path.extname(file.name);
-            file.mv(path.join(__dirname, 'public/uploads', nomeImagem));
+            file.mv(path.join(__dirname, 'uploads', nomeImagem));
             produtos[idx].imagem = 'uploads/' + nomeImagem;
         }
         fs.writeFileSync(arquivoLoja, JSON.stringify(produtos, null, 2));
@@ -189,6 +193,9 @@ app.delete('/api/loja/:id', (req, res) => {
     res.send("OK");
 });
 
+// ==========================================
+// 💸 CHECKOUT AUTOMÁTICO E REGISTRO CSV
+// ==========================================
 app.post('/api/checkout-automatico', async (req, res) => {
     const { idProduto, nome, email, qtd, telefone } = req.body;
     const produtos = JSON.parse(fs.readFileSync(arquivoLoja));
@@ -227,16 +234,13 @@ app.post('/api/checkout-automatico', async (req, res) => {
         await transporter.sendMail({
             from: '"Portal do Petroleiro UFES" <portalpetroleiroufes@gmail.com>',
             to: email,
-            subject: `⏳ Reserva de Rifa: ${idReserva} - ${produto.titulo}`,
-            html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; border: 1px solid #002d5b; border-top: 10px solid #002d5b; padding: 20px; color: #333;">
+            subject: `⏳ Reserva: ${idReserva} - ${produto.titulo}`,
+            html: `<div style="font-family: Arial; border-top: 10px solid #002d5b; padding: 20px;">
                     <h2>Olá, ${nome}!</h2>
-                    <p>Sua reserva para <strong>${produto.titulo}</strong> foi recebida.</p>
-                    <p><strong>Código da Reserva:</strong> ${idReserva}</p>
+                    <p>Reserva para <strong>${produto.titulo}</strong> recebida.</p>
                     <p><strong>Valor Total:</strong> R$ ${valorFinal.toFixed(2)}</p>
                     <p><strong>Chave PIX:</strong> ${produto.pix}</p>
-                    <p>⚠️ Seus números oficiais serão enviados após a confirmação do pagamento.</p>
-                </div>`
+                   </div>`
         });
     } catch (error) {
         console.error("❌ Erro e-mail:", error.message);
@@ -247,5 +251,5 @@ app.post('/api/checkout-automatico', async (req, res) => {
 
 // LIGA O MOTOR
 app.listen(PORT, () => { 
-    console.log(`\n🚀 MOTOR LIGADO NA PORTA ${PORT}! ACESSO LIVRE.`); 
+    console.log(`\n🚀 MOTOR COMPLETO LIGADO NA PORTA ${PORT}!`); 
 });
