@@ -83,7 +83,7 @@
     <div class="timer-circle" id="timerDisplay">06:00</div>
 
     <div class="qr-code-area">
-        <img src="uploads/qrcode.jpg" alt="QR Code PIX">
+        <img src="/uploads/qrcode.jpg" alt="QR Code PIX">
     </div>
 
     <div class="pix-copy-box" id="pixCode"></div>
@@ -91,7 +91,7 @@
 
     <div class="summary-card">
         <p style="margin:0;"><strong>Valor Total:</strong> <span id="finalValor"></span></p>
-        <p style="margin:5px 0 0 0;"><strong>Seus Números:</strong> <span id="finalNums" style="color:var(--secondary); font-weight:bold;"></span></p>
+        <p style="margin:5px 0 0 0;"><strong>Seus Números:</strong> <span id="finalNums" style="color:var(--secondary); font-weight:bold;">Enviados por e-mail</span></p>
     </div>
     <p style="font-size:12px; color:#777;"><i class="fas fa-shield-alt"></i> Pague dentro do prazo para não perder seus números.</p>
 </div>
@@ -116,7 +116,7 @@
         document.getElementById('vitrine').innerHTML = `
             <div class="banner">
                 <div class="live-badge">CAMPANHA ATIVA</div>
-                <img src="${produto.imagem || ''}">
+                <img src="/${produto.imagem || ''}">
             </div>
             <div class="content">
                 <span class="price-tag">R$ ${produto.preco}</span>
@@ -196,11 +196,9 @@
         document.getElementById('screenReview').style.display = 'none';
         document.getElementById('screenPayment').style.display = 'block';
         document.getElementById('finalValor').innerText = `R$ ${r.valor}`;
-        document.getElementById('finalNums').innerText = r.numeros.join(', ');
         document.getElementById('pixCode').innerText = produto.pix;
         document.getElementById('resID').innerText = r.recibo.split('-')[1];
 
-        // CRONÔMETRO REAL
         let tempo = 360;
         const display = document.getElementById('timerDisplay');
         clearInterval(cronometro);
