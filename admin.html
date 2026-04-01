@@ -3,268 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Administrativo | Portal do Petroleiro</title>
+    <title>Admin | Portal do Petroleiro</title>
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --primary: #002d5b; --secondary: #ff6600; --success: #28a745; --danger: #dc3545; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
-        .container { max-width: 1100px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.1); }
-        
-        h1 { color: var(--primary); border-bottom: 4px solid var(--secondary); padding-bottom: 10px; display: flex; align-items: center; gap: 10px; }
-        h2 { color: var(--primary); font-size: 1.2rem; margin-top: 30px; display: flex; align-items: center; gap: 8px; }
-
-        .card { background: #f8f9fa; border: 1px solid #e1e4e8; padding: 20px; border-radius: 10px; margin-bottom: 25px; }
-        .card-rifa { border-left: 5px solid var(--secondary); }
-        .card-news { border-left: 5px solid var(--primary); }
-
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
-        label { font-size: 12px; font-weight: bold; color: #555; text-transform: uppercase; }
-
-        .btn { border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; display: flex; align-items: center; gap: 8px; justify-content: center; }
-        .btn-save { background: var(--secondary); color: white; width: 100%; font-size: 16px; margin-top: 10px; }
-        .btn-save:hover { background: #e65c00; }
-        .btn-edit { background: var(--primary); color: white; padding: 5px 10px; font-size: 12px; }
-        .btn-del { background: var(--danger); color: white; padding: 5px 10px; font-size: 12px; }
-
-        /* Tabela Profissional */
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; border-radius: 8px; overflow: hidden; }
-        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
-        th { background: #f1f3f5; color: var(--primary); text-transform: uppercase; font-size: 11px; }
-        tr:hover { background: #fdfdfd; }
-        .img-preview { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; }
-
-        #editor-noticia { height: 200px; background: white; margin-bottom: 10px; }
+        :root { --primary: #002d5b; --accent: #ff6600; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h1 { color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 10px; }
+        .card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-top: 20px; }
+        label { font-weight: bold; color: #555; display: block; margin-top: 15px; }
+        input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        #editor { height: 300px; margin-bottom: 20px; background: white; }
+        .btn-post { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 20px; }
+        .btn-post:hover { background: #e65c00; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1><i class="fas fa-user-shield"></i> Painel de Controle | UFES</h1>
-
-    <div class="card card-rifa">
-        <h2><i class="fas fa-shopping-cart"></i> Gerenciar Rifas e Ingressos</h2>
-        <form id="formLoja" action="/api/loja/cadastrar" method="POST" encType="multipart/form-data">
-            <div class="grid">
-                <div>
-                    <label>Tipo de Campanha</label>
-                    <select name="tipo" id="rifa_tipo">
-                        <option value="Rifa">🎟️ Rifa / Sorteio</option>
-                        <option value="Ingresso">🎫 Ingresso para Evento</option>
-                        <option value="Minicurso">📚 Inscrição de Minicurso</option>
-                    </select>
-                </div>
-                <div style="display: flex; align-items: center; gap: 10px; padding-top: 25px;">
-                    <input type="checkbox" name="ativo" checked style="width: 20px; height: 20px;">
-                    <span style="font-weight: bold; color: var(--primary);">CAMPANHA ATIVA NO SITE</span>
-                </div>
-            </div>
-
-            <input type="text" name="titulo" placeholder="Ex: Cesta de Chocolate Dia das Mães" required>
-            <input type="text" name="descricao" placeholder="Descrição rápida para o cliente">
-
-            <div class="grid-4">
-                <div><label>Preço Unit.</label><input type="text" name="preco" placeholder="5.00"></div>
-                <div><label>Total de Números</label><input type="number" name="maxVendas" placeholder="100"></div>
-                <div><label>Qtd Promo</label><input type="number" name="promoQtd" placeholder="3"></div>
-                <div><label>Preço Promo</label><input type="text" name="promoPreco" placeholder="10.00"></div>
-            </div>
-
-            <div class="grid">
-                <div>
-                    <label>Data e Hora Limite de Venda</label>
-                    <input type="datetime-local" name="dataLimite">
-                </div>
-                <div>
-                    <label>Sua Chave PIX</label>
-                    <input type="text" name="pix" placeholder="Chave PIX (Para o Copia e Cola)" required>
-                </div>
-            </div>
-
-            <label>Foto do Produto/Prêmio</label>
-            <input type="file" name="imagemProduto">
-
-            <div class="grid">
-                <button type="submit" id="btnLojaSubmit" class="btn btn-save">PUBLICAR CAMPANHA</button>
-                <button type="button" id="btnLojaCancel" onclick="cancelarEdicaoLoja()" class="btn" style="display:none; background:#666; color:white; margin-top:10px;">CANCELAR EDIÇÃO</button>
-            </div>
-        </form>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Foto</th>
-                    <th>Título</th>
-                    <th>Tipo</th>
-                    <th>Preço</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="tabela-rifas"></tbody>
-        </table>
-    </div>
-
-    <div class="card card-news">
-        <h2><i class="fas fa-newspaper"></i> Gerenciar Notícias e Artigos</h2>
-        <form id="formNoticia" action="/cadastrar-produto" method="POST" encType="multipart/form-data">
-            <input type="text" name="name" placeholder="Título da Notícia" required>
-            <div id="editor-noticia"></div>
-            <input type="hidden" name="description" id="hiddenDescription">
+    <h1><i class="fas fa-edit"></i> Publicar no Portal</h1>
+    
+    <div class="card">
+        <form id="formNoticia" action="/api/admin/postar-noticia" method="POST" enctype="multipart/form-data">
+            <label>Título da Matéria</label>
+            <input type="text" name="name" placeholder="Ex: Novo Estágio na Petrobras" required>
             
-            <div class="grid">
-                <div>
-                    <label>Categoria</label>
-                    <select name="category" onchange="checkCategory(this)">
-                        <option value="Engenharia">Engenharia</option>
-                        <option value="Eventos">Eventos</option>
-                        <option value="Avisos">Avisos</option>
-                        <option value="Outros">Outros...</option>
-                    </select>
-                </div>
-                <input type="text" name="category_custom" id="category_custom" placeholder="Qual categoria?" style="display:none; margin-top: 25px;">
-            </div>
+            <label>Categoria</label>
+            <select name="category">
+                <option value="Institucional">Institucional</option>
+                <option value="Estágios e Empregos">Estágios</option>
+                <option value="Eventos">Eventos</option>
+            </select>
 
-            <label>Imagens da Notícia</label>
-            <input type="file" name="productImages" multiple>
-            <button type="submit" id="btnNoticiaSubmit" class="btn btn-save" style="background: var(--primary);">PUBLICAR NOTÍCIA</button>
-            <button type="button" id="btnNoticiaCancel" onclick="cancelarEdicaoNoticia()" class="btn" style="display:none; background:#666; color:white; margin-top:10px;">CANCELAR EDIÇÃO</button>
+            <label>Conteúdo da Notícia</label>
+            <div id="editor"></div>
+            <input type="hidden" name="description" id="hiddenDesc">
+
+            <label>Fotos (pode selecionar várias)</label>
+            <input type="file" name="productImages" multiple accept="image/*">
+
+            <button type="submit" class="btn-post">PUBLICAR AGORA</button>
         </form>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Título</th>
-                    <th>Categoria</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="tabela-noticias"></tbody>
-        </table>
     </div>
 </div>
 
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 <script>
-    var quill = new Quill('#editor-noticia', { theme: 'snow' });
-
-    function carregarLoja() {
-        fetch('/api/loja').then(res => res.json()).then(data => {
-            const tbody = document.getElementById('tabela-rifas');
-            tbody.innerHTML = data.map(p => `
-                <tr>
-                    <td><img src="${p.imagem}" class="img-preview"></td>
-                    <td><b>${p.titulo}</b></td>
-                    <td><span style="color:var(--secondary); font-weight:bold;">${p.tipo}</span></td>
-                    <td>R$ ${p.preco}</td>
-                    <td>
-                        <button onclick="editarRifa(${p.id})" class="btn btn-edit"><i class="fas fa-edit"></i></button>
-                        <button onclick="deletarRifa(${p.id})" class="btn btn-del"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-            `).join('');
-        });
-    }
-
-    function editarRifa(id) {
-        fetch('/api/loja').then(res => res.json()).then(data => {
-            const p = data.find(item => item.id == id);
-            const form = document.getElementById('formLoja');
-            form.action = '/api/loja/editar/' + id; 
-            form.titulo.value = p.titulo;
-            form.descricao.value = p.descricao;
-            form.preco.value = p.preco;
-            form.maxVendas.value = p.maxVendas;
-            form.promoQtd.value = p.promoQtd || '';
-            form.promoPreco.value = p.promoPreco || '';
-            form.pix.value = p.pix;
-            form.tipo.value = p.tipo;
-            form.ativo.checked = p.ativo;
-            // ADICIONADO: PREENCHE A DATA NA EDIÇÃO
-            form.dataLimite.value = p.dataLimite || '';
-
-            document.getElementById('btnLojaSubmit').innerText = "SALVAR ALTERAÇÕES";
-            document.getElementById('btnLojaSubmit').style.background = "var(--success)";
-            document.getElementById('btnLojaCancel').style.display = "block";
-            window.scrollTo(0,0);
-        });
-    }
-
-    function cancelarEdicaoLoja() {
-        const form = document.getElementById('formLoja');
-        form.action = "/api/loja/cadastrar";
-        form.reset();
-        document.getElementById('btnLojaSubmit').innerText = "PUBLICAR CAMPANHA";
-        document.getElementById('btnLojaSubmit').style.background = "var(--secondary)";
-        document.getElementById('btnLojaCancel').style.display = "none";
-    }
-
-    function deletarRifa(id) {
-        if(confirm("Apagar esta rifa permanentemente?")) {
-            fetch('/api/loja/' + id, { method: 'DELETE' }).then(() => carregarLoja());
+    var quill = new Quill('#editor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, false] }],
+                ['bold', 'italic', 'underline'],
+                ['link', 'blockquote'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }]
+            ]
         }
-    }
-
-    function carregarNoticias() {
-        fetch('/api/produtos').then(res => res.json()).then(data => {
-            const tbody = document.getElementById('tabela-noticias');
-            tbody.innerHTML = data.map(n => `
-                <tr>
-                    <td>${n.name}</td>
-                    <td>${n.category}</td>
-                    <td>
-                        <button onclick="editarNoticia(${n.id})" class="btn btn-edit"><i class="fas fa-edit"></i></button>
-                        <button onclick="deletarNoticia(${n.id})" class="btn btn-del"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-            `).join('');
-        });
-    }
-
-    function editarNoticia(id) {
-        fetch('/api/produto/' + id).then(res => res.json()).then(n => {
-            const f = document.getElementById('formNoticia');
-            f.action = '/editar-produto/' + id; 
-            f.name.value = n.name;
-            quill.root.innerHTML = n.description; 
-            
-            const btn = document.getElementById('btnNoticiaSubmit');
-            btn.innerText = "SALVAR ALTERAÇÕES NOTÍCIA";
-            btn.style.background = "var(--success)";
-            document.getElementById('btnNoticiaCancel').style.display = "block";
-            
-            window.scrollTo(0, document.getElementById('formNoticia').offsetTop - 20);
-        });
-    }
-
-    function cancelarEdicaoNoticia() {
-        const f = document.getElementById('formNoticia');
-        f.action = "/cadastrar-produto";
-        f.reset();
-        quill.root.innerHTML = "";
-        document.getElementById('btnNoticiaSubmit').innerText = "PUBLICAR NOTÍCIA";
-        document.getElementById('btnNoticiaSubmit').style.background = "var(--primary)";
-        document.getElementById('btnNoticiaCancel').style.display = "none";
-    }
-
-    function deletarNoticia(id) {
-        if(confirm("Apagar esta notícia?")) {
-            fetch('/api/produto/' + id, { method: 'DELETE' }).then(() => carregarNoticias());
-        }
-    }
-
-    function checkCategory(sel) {
-        document.getElementById('category_custom').style.display = sel.value === 'Outros' ? 'block' : 'none';
-    }
+    });
 
     document.getElementById('formNoticia').onsubmit = function() {
-        document.getElementById('hiddenDescription').value = quill.root.innerHTML;
+        document.getElementById('hiddenDesc').value = quill.root.innerHTML;
     };
-
-    carregarLoja();
-    carregarNoticias();
 </script>
 </body>
 </html>
