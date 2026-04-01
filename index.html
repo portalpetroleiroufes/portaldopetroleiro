@@ -14,7 +14,6 @@
         }
         header { background: rgba(0, 45, 91, 0.9); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--laranja); position: sticky; top:0; z-index:100; backdrop-filter: blur(10px); }
         
-        /* 🚀 NOVO: O CARROSSEL MÁGICO DA LOJA */
         #secao-loja { display: none; padding: 20px 20px 0; max-width: 800px; margin: 0 auto; }
         .titulo-secao { font-size: 16px; color: var(--laranja); text-transform: uppercase; font-weight: 900; margin-bottom: 10px; letter-spacing: 1px; }
         .carrossel-container { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px; scroll-snap-type: x mandatory; scrollbar-width: none; }
@@ -38,20 +37,6 @@
         .item-card img { width: 100%; height: 180px; object-fit: cover; }
         .item-info { padding: 15px; }
 
-        #modal-sobre { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(10px); }
-        .modal-content { background: var(--azul); padding: 30px; border-radius: 20px; width: 90%; max-width: 500px; border: 2px solid var(--laranja); position: relative; text-align: center; }
-        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 25px; cursor: pointer; }
-
-        #petrolinho-btn { position: fixed; bottom: 90px; right: 20px; width: 65px; height: 65px; background: var(--laranja); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4); z-index: 1000; overflow: hidden; }
-        #chat-window { position: fixed; bottom: 165px; right: 20px; width: 320px; height: 450px; background: #1e2124; border-radius: 15px; display: none; flex-direction: column; border: 2px solid var(--laranja); z-index: 1000; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .chat-header { background: var(--azul); padding: 15px; text-align: center; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-        .msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; font-size: 14px; }
-        .msg.bot { background: #333; align-self: flex-start; }
-        .msg.user { background: var(--azul); align-self: flex-end; }
-        .chat-input { display: flex; padding: 12px; background: #141619; }
-        .chat-input input { flex: 1; background: #000; border: 1px solid #333; color: white; padding: 10px; border-radius: 5px; outline: none; }
-        
         nav { position: fixed; bottom: 0; width: 100%; background: rgba(0, 45, 91, 0.95); display: flex; padding: 15px 0; border-top: 2px solid var(--laranja); z-index: 999; }
         .nav-item { text-align: center; flex: 1; cursor: pointer; color: #a0c4ff; }
         .nav-item.active { color: var(--laranja); }
@@ -67,7 +52,7 @@
     </header>
 
     <div id="secao-loja">
-        <div class="titulo-secao"><i class="fas fa-shopping-bag"></i> Loja & Eventos em Destaque</div>
+        <div class="titulo-secao"><i class="fas fa-shopping-bag"></i> Campanhas em Destaque</div>
         <div class="carrossel-container" id="carrossel-loja"></div>
     </div>
 
@@ -86,34 +71,12 @@
 
     <div id="lista-noticias" class="grid-noticias"></div>
 
-    <div id="petrolinho-btn" onclick="toggleChat()">
-        <img src="petrolinho.png" style="width: 100%; height: 100%; object-fit: cover;" alt="Petrolinho" onerror="this.src='https://via.placeholder.com/65'">
-    </div>
-    
-    <div id="chat-window">
-        <div class="chat-header"><span>Petrolinho IA - CEUNES</span></div>
-        <div class="chat-messages" id="chatMsgs"><div class="msg bot">Olá! Sou o Petrolinho. Como posso ajudar você hoje?</div></div>
-        <div class="chat-input"><input type="text" id="userMsg" placeholder="Pergunte algo..." onkeypress="if(event.key==='Enter') enviarMensagem()"></div>
-    </div>
-
-    <div id="modal-sobre">
-        <div class="modal-content">
-            <span class="close-modal" onclick="toggleSobre()">&times;</span>
-            <h2 style="color:var(--laranja)">Sobre o Portal</h2>
-            <p>O Portal do Petroleiro é a voz da Engenharia de Petróleo no CEUNES/UFES.</p>
-            <hr style="border: 0.5px solid rgba(255,255,255,0.1); margin: 20px 0;">
-            <h3>🤝 Parcerias & Suporte</h3>
-            <p><i class="fab fa-instagram"></i> @portaldopetroleiro</p>
-            <p><i class="fas fa-envelope"></i> portaldopetroleiroufes@gmail.com</p>
-        </div>
-    </div>
-
     <nav>
         <div class="nav-item active" onclick="window.location.href='index.html'">
             <i class="fas fa-newspaper fa-lg"></i><br><small>Notícias</small>
         </div>
         <div class="nav-item" onclick="window.location.href='vendas.html'">
-            <i class="fas fa-shopping-cart fa-lg"></i><br><small>Vendas</small>
+            <i class="fas fa-shopping-cart fa-lg"></i><br><small>Loja</small>
         </div>
         <div class="nav-item" onclick="toggleSobre()">
             <i class="fas fa-info-circle fa-lg"></i><br><small>Sobre</small>
@@ -121,85 +84,60 @@
     </nav>
 
     <script>
-        // 🛠 CONCERTO DO DIRECIONAMENTO PARA O NOVO SISTEMA DE VENDAS
-        fetch('/api/loja').then(res => res.json()).then(produtos => {
-            if (produtos && produtos.length > 0) {
-                document.getElementById('secao-loja').style.display = 'block';
-                document.getElementById('carrossel-loja').innerHTML = produtos.map(p => {
-                    let corTag = p.tipo === 'Ingresso' ? '#00cc66' : p.tipo === 'Minicurso' ? '#0099ff' : '#ff6600';
-                    return `
+        // 1. CARREGA O CARROSSEL DO SISTEMA NOVO (loja_produtos.json)
+        async function carregarLoja() {
+            try {
+                const res = await fetch('/api/vendas/listar');
+                const produtos = await res.json();
+                if (produtos && produtos.length > 0) {
+                    document.getElementById('secao-loja').style.display = 'block';
+                    document.getElementById('carrossel-loja').innerHTML = produtos.map(p => `
                         <div class="card-loja" onclick="window.location.href='vendas.html?id=${p.id}'">
-                            <span class="tag-tipo" style="background:${corTag}">${p.tipo}</span>
-                            <img src="${p.imagem ? '/' + p.imagem : 'https://via.placeholder.com/300'}" onerror="this.src='https://via.placeholder.com/300'">
+                            <span class="tag-tipo">${p.tipo || 'Campanha'}</span>
+                            <img src="/${p.imagem}" onerror="this.src='https://via.placeholder.com/300'">
                             <div class="card-loja-info">
-                                <h3 style="margin: 0 0 5px 0; font-size: 16px; color: white;">${p.titulo}</h3>
-                                <div style="color: #00ff88; font-weight: 900; font-size: 18px;">R$ ${p.preco}</div>
+                                <h3 style="margin:0; font-size:16px;">${p.titulo}</h3>
+                                <div style="color:#00ff88; font-weight:900; font-size:18px;">R$ ${p.preco}</div>
                             </div>
                         </div>
-                    `;
-                }).join('');
-            }
-        });
+                    `).join('');
+                }
+            } catch (e) { console.error("Erro na loja"); }
+        }
 
+        // 2. CARREGA NOTÍCIAS (MANTIDO)
         let noticias = [];
-        fetch('/api/produtos').then(res => res.json()).then(data => { noticias = data; render(data); });
+        async function carregarNoticias() {
+            const res = await fetch('/api/noticias');
+            noticias = await res.json();
+            render(noticias);
+        }
 
         function render(l) {
             document.getElementById('lista-noticias').innerHTML = l.map(n => `
                 <div class="item-card" onclick="window.location.href='artigo.html?id=${n.id}'">
-                    <img src="${n.images ? '/' + n.images.split(',')[0] : 'https://via.placeholder.com/400'}" onerror="this.src='https://via.placeholder.com/400'">
+                    <img src="/${n.images ? n.images.split(',')[0] : ''}" onerror="this.src='https://via.placeholder.com/400'">
                     <div class="item-info">
-                        <span style="color:var(--laranja); font-size:11px; font-weight:bold; text-transform:uppercase;">${n.category}</span>
+                        <span style="color:var(--laranja); font-size:11px; font-weight:bold;">${n.category}</span>
                         <h4 style="margin:8px 0; font-size:18px;">${n.name}</h4>
                     </div>
                 </div>
             `).join('');
         }
 
+        // Filtros e Funções Extras
         function filtrar() {
             const t = document.getElementById('searchInput').value.toLowerCase();
             render(noticias.filter(n => n.name.toLowerCase().includes(t)));
         }
-
         function fCat(c, b) {
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             b.classList.add('active');
             render(c === 'Todos' ? noticias : noticias.filter(n => n.category === c));
         }
 
-        function toggleSobre() {
-            const m = document.getElementById('modal-sobre');
-            m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
-        }
-
-        function toggleChat() {
-            const c = document.getElementById('chat-window');
-            c.style.display = c.style.display === 'flex' ? 'none' : 'flex';
-        }
-
-        async function enviarMensagem() {
-            const input = document.getElementById('userMsg');
-            const msg = input.value;
-            if(!msg) return;
-            const chat = document.getElementById('chatMsgs');
-            chat.innerHTML += `<div class="msg user">${msg}</div>`;
-            input.value = '';
-            const loadId = "load-" + Date.now();
-            chat.innerHTML += `<div class="msg bot" id="${loadId}">...</div>`;
-            chat.scrollTop = chat.scrollHeight;
-            try {
-                const res = await fetch('/api/petrolinho', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ pergunta: msg })
-                });
-                const data = await res.json();
-                document.getElementById(loadId).innerHTML = data.resposta;
-            } catch (e) {
-                document.getElementById(loadId).innerText = "Erro.";
-            }
-            chat.scrollTop = chat.scrollHeight;
-        }
+        carregarLoja();
+        carregarNoticias();
     </script>
 </body>
 </html>
