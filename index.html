@@ -112,7 +112,7 @@
         <div class="nav-item active" onclick="window.location.href='index.html'">
             <i class="fas fa-newspaper fa-lg"></i><br><small>Notícias</small>
         </div>
-        <div class="nav-item" onclick="window.location.href='rifa.html'">
+        <div class="nav-item" onclick="window.location.href='vendas.html'">
             <i class="fas fa-shopping-cart fa-lg"></i><br><small>Vendas</small>
         </div>
         <div class="nav-item" onclick="toggleSobre()">
@@ -121,13 +121,14 @@
     </nav>
 
     <script>
+        // 🛠 CONCERTO DO DIRECIONAMENTO PARA O NOVO SISTEMA DE VENDAS
         fetch('/api/loja').then(res => res.json()).then(produtos => {
             if (produtos && produtos.length > 0) {
                 document.getElementById('secao-loja').style.display = 'block';
                 document.getElementById('carrossel-loja').innerHTML = produtos.map(p => {
                     let corTag = p.tipo === 'Ingresso' ? '#00cc66' : p.tipo === 'Minicurso' ? '#0099ff' : '#ff6600';
                     return `
-                        <div class="card-loja" onclick="window.location.href='rifa.html?id=${p.id}'">
+                        <div class="card-loja" onclick="window.location.href='vendas.html?id=${p.id}'">
                             <span class="tag-tipo" style="background:${corTag}">${p.tipo}</span>
                             <img src="${p.imagem ? '/' + p.imagem : 'https://via.placeholder.com/300'}" onerror="this.src='https://via.placeholder.com/300'">
                             <div class="card-loja-info">
