@@ -12,54 +12,35 @@
             background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1516937941344-00b4e0337589?q=80&w=1000');
             background-size: cover; background-position: center; background-attachment: fixed;
         }
-        header { background: rgba(0, 45, 91, 0.9); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--laranja); position: sticky; top:0; z-index:100; backdrop-filter: blur(10px); }
-        
-        #secao-loja { display: none; padding: 20px 20px 0; max-width: 800px; margin: 0 auto; }
-        .titulo-secao { font-size: 16px; color: var(--laranja); text-transform: uppercase; font-weight: 900; margin-bottom: 10px; letter-spacing: 1px; }
-        .carrossel-container { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px; scroll-snap-type: x mandatory; scrollbar-width: none; }
-        .carrossel-container::-webkit-scrollbar { display: none; }
-        .card-loja { flex: 0 0 280px; background: rgba(0, 21, 41, 0.95); border: 1px solid rgba(255,102,0,0.3); border-radius: 12px; overflow: hidden; scroll-snap-align: start; cursor: pointer; transition: transform 0.3s; position: relative; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        .card-loja:active { transform: scale(0.95); }
-        .card-loja img { width: 100%; height: 150px; object-fit: cover; border-bottom: 2px solid var(--laranja); }
-        .card-loja-info { padding: 15px; }
-        .tag-tipo { position: absolute; top: 10px; left: 10px; background: var(--laranja); color: white; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; text-transform: uppercase; box-shadow: 0 2px 5px rgba(0,0,0,0.5); z-index: 10; }
+        header { background: rgba(0, 45, 91, 0.9); padding: 15px 20px; display: flex; justify-content: center; align-items: center; border-bottom: 3px solid var(--laranja); position: sticky; top:0; z-index:100; backdrop-filter: blur(10px); }
         
         .search-container { padding: 20px; max-width: 800px; margin: 0 auto; }
         .search-box { display: flex; background: var(--vidro); border-radius: 30px; padding: 5px 20px; border: 1px solid rgba(255,255,255,0.2); }
         .search-box input { background: none; border: none; color: white; padding: 10px; width: 100%; outline: none; font-size: 16px; }
+        
         .filtros { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
         .filter-btn { background: var(--vidro); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 8px 18px; border-radius: 20px; cursor: pointer; white-space: nowrap; }
         .filter-btn.active { background: var(--laranja); font-weight: bold; }
 
         .grid-noticias { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 0 20px; max-width: 800px; margin: 0 auto; }
         .item-card { background: var(--vidro); backdrop-filter: blur(5px); border-radius: 15px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.3s; }
-        .item-card:hover { transform: translateY(-5px); border-color: var(--laranja); }
-        .item-card img { width: 100%; height: 180px; object-fit: cover; }
+        .item-card img { width: 100%; height: 200px; object-fit: cover; }
         .item-info { padding: 15px; }
 
         nav { position: fixed; bottom: 0; width: 100%; background: rgba(0, 45, 91, 0.95); display: flex; padding: 15px 0; border-top: 2px solid var(--laranja); z-index: 999; }
-        .nav-item { text-align: center; flex: 1; cursor: pointer; color: #a0c4ff; }
-        .nav-item.active { color: var(--laranja); }
+        .nav-item { text-align: center; flex: 1; cursor: pointer; color: white; opacity: 0.7; }
+        .nav-item.active { opacity: 1; color: var(--laranja); }
     </style>
 </head>
 <body>
     <header>
-        <div style="display:flex; align-items:center; gap:10px;">
-            <img src="logo-portal.png" style="height:35px; border-radius:50%; border:2px solid var(--laranja);" onerror="this.src='https://via.placeholder.com/35'">
-            <span style="font-weight:900; text-transform:uppercase;">Portal do Petroleiro</span>
-        </div>
-        <a href="https://instagram.com/portaldopetroleiro" target="_blank" style="color:white;"><i class="fab fa-instagram fa-lg"></i></a>
+        <span style="font-weight:900; text-transform:uppercase; letter-spacing: 2px;">Portal do Petroleiro UFES</span>
     </header>
-
-    <div id="secao-loja">
-        <div class="titulo-secao"><i class="fas fa-shopping-bag"></i> Campanhas em Destaque</div>
-        <div class="carrossel-container" id="carrossel-loja"></div>
-    </div>
 
     <div class="search-container">
         <div class="search-box">
             <i class="fas fa-search" style="margin-top:12px; margin-right: 10px;"></i>
-            <input type="text" id="searchInput" placeholder="Pesquisar notícias..." onkeyup="filtrar()">
+            <input type="text" id="searchInput" placeholder="Pesquisar no portal..." onkeyup="filtrar()">
         </div>
         <div class="filtros">
             <button class="filter-btn active" onclick="fCat('Todos', this)">Todos</button>
@@ -72,72 +53,43 @@
     <div id="lista-noticias" class="grid-noticias"></div>
 
     <nav>
-        <div class="nav-item active" onclick="window.location.href='index.html'">
+        <div class="nav-item active" onclick="location.reload()">
             <i class="fas fa-newspaper fa-lg"></i><br><small>Notícias</small>
         </div>
-        <div class="nav-item" onclick="window.location.href='vendas.html'">
-            <i class="fas fa-shopping-cart fa-lg"></i><br><small>Loja</small>
-        </div>
-        <div class="nav-item" onclick="toggleSobre()">
+        <div class="nav-item" onclick="alert('Sistema de Vendas Removido')">
             <i class="fas fa-info-circle fa-lg"></i><br><small>Sobre</small>
         </div>
     </nav>
 
     <script>
-        // 1. CARREGA O CARROSSEL DO SISTEMA NOVO (loja_produtos.json)
-        async function carregarLoja() {
-            try {
-                const res = await fetch('/api/vendas/listar');
-                const produtos = await res.json();
-                if (produtos && produtos.length > 0) {
-                    document.getElementById('secao-loja').style.display = 'block';
-                    document.getElementById('carrossel-loja').innerHTML = produtos.map(p => `
-                        <div class="card-loja" onclick="window.location.href='vendas.html?id=${p.id}'">
-                            <span class="tag-tipo">${p.tipo || 'Campanha'}</span>
-                            <img src="/${p.imagem}" onerror="this.src='https://via.placeholder.com/300'">
-                            <div class="card-loja-info">
-                                <h3 style="margin:0; font-size:16px;">${p.titulo}</h3>
-                                <div style="color:#00ff88; font-weight:900; font-size:18px;">R$ ${p.preco}</div>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-            } catch (e) { console.error("Erro na loja"); }
-        }
-
-        // 2. CARREGA NOTÍCIAS (MANTIDO)
         let noticias = [];
-        async function carregarNoticias() {
-            const res = await fetch('/api/noticias');
-            noticias = await res.json();
-            render(noticias);
-        }
+        fetch('/api/noticias').then(res => res.json()).then(data => {
+            noticias = data;
+            render(data);
+        });
 
         function render(l) {
             document.getElementById('lista-noticias').innerHTML = l.map(n => `
                 <div class="item-card" onclick="window.location.href='artigo.html?id=${n.id}'">
                     <img src="/${n.images ? n.images.split(',')[0] : ''}" onerror="this.src='https://via.placeholder.com/400'">
                     <div class="item-info">
-                        <span style="color:var(--laranja); font-size:11px; font-weight:bold;">${n.category}</span>
-                        <h4 style="margin:8px 0; font-size:18px;">${n.name}</h4>
+                        <span style="color:var(--laranja); font-size:11px; font-weight:bold; text-transform:uppercase;">${n.category}</span>
+                        <h4 style="margin:8px 0; font-size:19px; line-height:1.3;">${n.name}</h4>
                     </div>
                 </div>
             `).join('');
         }
 
-        // Filtros e Funções Extras
         function filtrar() {
             const t = document.getElementById('searchInput').value.toLowerCase();
             render(noticias.filter(n => n.name.toLowerCase().includes(t)));
         }
+
         function fCat(c, b) {
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             b.classList.add('active');
             render(c === 'Todos' ? noticias : noticias.filter(n => n.category === c));
         }
-
-        carregarLoja();
-        carregarNoticias();
     </script>
 </body>
 </html>
