@@ -21,6 +21,11 @@
 <body>
 
 <div class="container">
+    <hr style="margin-top: 40px; border: 1px solid #eee;">
+<h2><i class="fas fa-list"></i> Notícias Publicadas</h2>
+<div id="listaNoticias" class="card">
+    <p>Carregando publicações...</p>
+</div>
     <h1><i class="fas fa-edit"></i> Publicar no Portal</h1>
     
     <div class="card">
@@ -64,6 +69,58 @@
     document.getElementById('formNoticia').onsubmit = function() {
         document.getElementById('hiddenDesc').value = quill.root.innerHTML;
     };
+    // Função para carregar as notícias existentes
+async function carregarNoticias() {
+    try {
+        const response = await fetch('/api/produtos'); // Rota que o seu servidor usa para listar
+        const noticias = await response.json();
+        const listaDiv = document.getElementById('listaNoticias');
+        
+        if (noticias.length === 0) {
+            listaDiv.innerHTML = '<p>Nenhuma notícia publicada ainda.</p>';
+            return;
+        }
+
+        let html = '<table style="width:100%; border-collapse: collapse;">';
+        html += '<tr style="text-align:left; border-bottom: 2px solid #eee;"><th>Título</th><th>Ação</th></tr>';
+        
+        noticias.forEach(noticia => {
+            html += `
+                <tr style="border-bottom: 1px solid #eee; height: 50px;">
+                    <td><strong>${noticia.name}</strong><br><small>${noticia.category}</small></td>
+                    <td>
+                        <button onclick="deletarNoticia('${noticia._id}')" style="background:#ff3333; color:white; border:none; padding:8px; border-radius:5px; cursor:pointer;">
+                            EXCLUIR
+                        </button>
+                    </td>
+                </tr>`;
+        });
+        
+        html += '</table>';
+        listaDiv.innerHTML = html;
+    } catch (error) {
+        console.error('Erro ao buscar notícias:', error);
+        document.getElementById('listaNoticias').innerHTML = '<p>Erro ao carregar lista.</p>';
+    }
+}
+
+// Função para deletar
+async function deletarNoticia(id) {
+    if (confirm('Tem certeza que deseja remover esta publicação do Portal?')) {
+        try {
+            const response = await fetch(`/api/admin/deletar-produto/${id}`, { method: 'DELETE' });
+            if (response.ok) {
+                alert('Publicação removida!');
+                carregarNoticias(); // Atualiza a lista
+            }
+        } catch (error) {
+            alert('Erro ao deletar');
+        }
+    }
+}
+
+// Chama a função assim que a página abre
+carregarNoticias();
 </script>
 </body>
 </html>
