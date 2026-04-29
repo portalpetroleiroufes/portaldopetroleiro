@@ -39,7 +39,23 @@ app.get('/api/noticia/:id', (req, res) => {
         res.json(row);
     });
 });
+// Rota para deletar uma notícia/produto
+app.delete('/api/admin/deletar-produto/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        // Se estiver usando MongoDB (Mongoose):
+        await Produto.findByIdAndDelete(id); 
+        
+        // Se estiver usando um arquivo JSON simples:
+        // produtos = produtos.filter(p => p._id !== id);
+        // salvarArquivo(produtos);
 
+        res.status(200).send({ message: 'Excluído com sucesso!' });
+    } catch (error) {
+        console.error('Erro ao deletar:', error);
+        res.status(500).send({ error: 'Erro interno ao deletar' });
+    }
+});
 // --- ROTA DO PAINEL ADM (POSTAR NOTÍCIA) ---
 app.post('/api/admin/postar-noticia', (req, res) => {
     const { name, description, category } = req.body;
