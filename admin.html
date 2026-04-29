@@ -69,58 +69,57 @@
     document.getElementById('formNoticia').onsubmit = function() {
         document.getElementById('hiddenDesc').value = quill.root.innerHTML;
     };
-    // Função para carregar as notícias existentes
-async function carregarNoticias() {
-    try {
-        const response = await fetch('/api/produtos'); // Rota que o seu servidor usa para listar
-        const noticias = await response.json();
-        const listaDiv = document.getElementById('listaNoticias');
-        
-        if (noticias.length === 0) {
-            listaDiv.innerHTML = '<p>Nenhuma notícia publicada ainda.</p>';
-            return;
-        }
 
-        let html = '<table style="width:100%; border-collapse: collapse;">';
-        html += '<tr style="text-align:left; border-bottom: 2px solid #eee;"><th>Título</th><th>Ação</th></tr>';
-        
-        noticias.forEach(noticia => {
-            html += `
-                <tr style="border-bottom: 1px solid #eee; height: 50px;">
-                    <td><strong>${noticia.name}</strong><br><small>${noticia.category}</small></td>
-                    <td>
-                        <button onclick="deletarNoticia('${noticia._id}')" style="background:#ff3333; color:white; border:none; padding:8px; border-radius:5px; cursor:pointer;">
-                            EXCLUIR
-                        </button>
-                    </td>
-                </tr>`;
-        });
-        
-        html += '</table>';
-        listaDiv.innerHTML = html;
-    } catch (error) {
-        console.error('Erro ao buscar notícias:', error);
-        document.getElementById('listaNoticias').innerHTML = '<p>Erro ao carregar lista.</p>';
-    }
-}
-
-// Função para deletar
-async function deletarNoticia(id) {
-    if (confirm('Tem certeza que deseja remover esta publicação do Portal?')) {
+    // FUNÇÃO CORRIGIDA: Agora chama /api/noticias e usa noticia.id
+    async function carregarNoticias() {
         try {
-            const response = await fetch(`/api/admin/deletar-produto/${id}`, { method: 'DELETE' });
-            if (response.ok) {
-                alert('Publicação removida!');
-                carregarNoticias(); // Atualiza a lista
+            const response = await fetch('/api/noticias'); 
+            const noticias = await response.json();
+            const listaDiv = document.getElementById('listaNoticias');
+            
+            if (!noticias || noticias.length === 0) {
+                listaDiv.innerHTML = '<p>Nenhuma notícia publicada ainda.</p>';
+                return;
             }
+
+            let html = '<table style="width:100%; border-collapse: collapse;">';
+            html += '<tr style="text-align:left; border-bottom: 2px solid #eee;"><th>Título</th><th>Ação</th></tr>';
+            
+            noticias.forEach(noticia => {
+                html += `
+                    <tr style="border-bottom: 1px solid #eee; height: 50px;">
+                        <td><strong>${noticia.name}</strong><br><small>${noticia.category}</small></td>
+                        <td>
+                            <button onclick="deletarNoticia('${noticia.id}')" style="background:#ff3333; color:white; border:none; padding:8px; border-radius:5px; cursor:pointer;">
+                                EXCLUIR
+                            </button>
+                        </td>
+                    </tr>`;
+            });
+            
+            html += '</table>';
+            listaDiv.innerHTML = html;
         } catch (error) {
-            alert('Erro ao deletar');
+            console.error('Erro ao buscar notícias:', error);
+            document.getElementById('listaNoticias').innerHTML = '<p>Erro ao carregar lista.</p>';
         }
     }
-}
 
-// Chama a função assim que a página abre
-carregarNoticias();
+    async function deletarNoticia(id) {
+        if (confirm('Tem certeza que deseja remover esta publicação do Portal?')) {
+            try {
+                const response = await fetch(`/api/admin/deletar-produto/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    alert('Publicação removida!');
+                    carregarNoticias(); 
+                }
+            } catch (error) {
+                alert('Erro ao deletar');
+            }
+        }
+    }
+
+    carregarNoticias();
 </script>
 </body>
 </html>
